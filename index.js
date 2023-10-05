@@ -25,6 +25,42 @@ const run = async () => {
     //
 
     //
+    app.get("/products", async (req, res) => {
+      const cursor = productCollection.find({});
+      const product = await cursor.toArray();
+      res.send(product);
+      // console.log(product);
+    });
+
+    //
+
+    app.get("/products/:id", async (req, res) => {
+      const id = req.params.id;
+      const result = await productCollection.findOne({ _id: ObjectId(id) });
+      // console.log(result);
+      res.send(result);
+    });
+
+    //
+
+    app.get("/filteredProducts", async (req, res) => {
+      const category = req.query.category;
+      // console.log("Received category:", category);
+
+      try {
+        const result = await productCollection
+          .find({ category: category })
+          .toArray();
+
+        console.log("Filtered products:", result);
+        res.json(result);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+      }
+    });
+
+    //
   } finally {
   }
 };

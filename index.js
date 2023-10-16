@@ -19,45 +19,104 @@ const client = new MongoClient(uri, {
 
 const run = async () => {
   try {
-    const db = client.db("tech-valley");
-    const productCollection = db.collection("products");
-
+    const db = client.db("paintxpress");
+    const serviceCollection = db.collection("services");
+    const categoryCollection = db.collection("categories");
+    const projectCollection = db.collection("projects");
+    const reviewCollection = db.collection("reviews");
+    const teamCollection = db.collection("teams");
     //
 
-    //
-    app.get("/products", async (req, res) => {
-      const cursor = productCollection.find({});
+    //get all service
+
+    app.get("/services", async (req, res) => {
+      const cursor = serviceCollection.find({});
       const product = await cursor.toArray();
       res.send(product);
       // console.log(product);
     });
 
-    //
+    //get filtered services
 
-    app.get("/products/:id", async (req, res) => {
+    app.get("/filteredServices", async (req, res) => {
+      const { search, category } = req.query;
+
+      const filter = {};
+      if (search) {
+        filter.$or = [
+          { title: { $regex: search, $options: "i" } },
+          { category: { $regex: search, $options: "i" } },
+        ];
+      }
+      if (category) {
+        filter.category = category;
+      }
+
+      const service = await serviceCollection.find(filter).toArray();
+      res.send(service);
+    });
+
+    //get single services
+
+    app.get("/services/:id", async (req, res) => {
       const id = req.params.id;
-      const result = await productCollection.findOne({ _id: ObjectId(id) });
+      const result = await serviceCollection.findOne({ _id: ObjectId(id) });
       // console.log(result);
       res.send(result);
     });
 
     //
 
-    app.get("/filteredProducts", async (req, res) => {
-      const category = req.query.category;
-      // console.log("Received category:", category);
+    //get all paint categories
 
-      try {
-        const result = await productCollection
-          .find({ category: category })
-          .toArray();
+    app.get("/categories", async (req, res) => {
+      const cursor = categoryCollection.find({});
+      const category = await cursor.toArray();
+      res.send(category);
+      // console.log(product);
+    });
 
-        console.log("Filtered products:", result);
-        res.json(result);
-      } catch (error) {
-        console.error("Error fetching products:", error);
-        res.status(500).json({ error: "Internal Server Error" });
+    //get all projects
+
+    app.get("/projects", async (req, res) => {
+      const project = await projectCollection.find({}).toArray();
+      res.send(project);
+      // console.log(product);
+    });
+
+    //get filtered projects
+
+    app.get("/filteredProjects", async (req, res) => {
+      const { search, category } = req.query;
+
+      const filter = {};
+      if (search) {
+        filter.$or = [
+          { name: { $regex: search, $options: "i" } },
+          { category: { $regex: search, $options: "i" } },
+          { tags: { $regex: search, $options: "i" } },
+        ];
       }
+      if (category) {
+        filter.category = category;
+      }
+
+      const project = await projectCollection.find(filter).toArray();
+      res.send(project);
+      // console.log(product);
+    });
+
+    // reviews
+    app.get("/reviews", async (req, res) => {
+      const review = await reviewCollection.find({}).toArray();
+      res.send(review);
+    });
+
+    //team
+
+    app.get("/teams", async (req, res) => {
+      const team = await teamCollection.find({}).toArray();
+      res.send(team);
     });
 
     //
@@ -72,5 +131,5 @@ app.get("/", (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
+  // console.log(`Example app listening on port ${port}`);
 });
